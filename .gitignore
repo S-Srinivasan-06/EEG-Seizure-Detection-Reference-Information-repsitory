@@ -1,0 +1,17 @@
+# Local research drafts and maintenance files
+_local_archive/
+notes/
+AGENTS.md
+.agents/
+.codex/
+
+# Local environment and credentials
+.env
+.env.*
+!.env.example
+.venv/
+venv/
+__pycache__/
+*.py[cod]
+.DS_Store
+Thumbs.db

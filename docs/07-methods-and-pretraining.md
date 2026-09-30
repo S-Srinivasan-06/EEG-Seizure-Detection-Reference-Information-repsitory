@@ -1,0 +1,43 @@
+# 7. Methods, datasets, and pretraining
+
+[Contents](../README.md) | [Chapter 6: Seed-paper appraisal](06-seed-paper-appraisal.md) | [Next: Clinical validation](08-clinical-validation.md)
+
+## From rules to learned representations
+
+Early seizure detectors combined rhythmic-wave and frequency rules, artifact handling, and data reduction. Their enduring problem is distinguishing evolving ictal activity from artifacts and background variation. These selected recordings and historical validation do not define contemporary clinical performance. Gotman’s early detector work is a point of reference for this lineage ([PMID 6181976](https://pubmed.ncbi.nlm.nih.gov/6181976/)).
+
+Later feature-based pipelines used time-frequency decompositions, wavelets, entropy, and conventional classifiers. Their assumptions can be inspected, making them useful baselines. Results on short curated windows cannot be translated into continuous false-alarm burden without full recordings and event-level scoring. Convolutional neural networks (CNNs), recurrent networks, and hybrids learned local morphology and temporal context from larger corpora, but the resulting evidence still depends on each dataset and protocol.
+
+Dataset provenance affects what a result means. Bonn contains five sets of 100 short segments, including intracranial sets, rather than long deployment streams ([Andrzejak et al.](https://doi.org/10.1103/PhysRevE.64.061907)). CHB-MIT contains pediatric scalp monitoring; Siena is a small adult long-term cohort; and TUSZ contains clinical scalp data with annotations and version-specific selection decisions. The original TUSZ corpus paper reports more than 504 hours and approximately 36 hours of seizure time in its described release [V] ([Shah et al.](https://doi.org/10.3389/fninf.2018.00083)).
+
+The SzCORE framework addresses differences in input channels, annotation conventions, event merge/split tolerances, and scoring units, each of which can change reported rankings ([Dan et al.](https://doi.org/10.1111/epi.18113); [official framework](https://github.com/esl-epfl/sz-validation-framework)). Its revised 2026 challenge report is a versioned, non-peer-reviewed preprint. On a private continuous scalp EEG cohort, it reports best F1 0.32, sensitivity 0.37, and precision 0.29 [V] ([version 2](https://arxiv.org/abs/2505.18191v2)). This is challenge-specific evidence, not a universal ceiling.
+
+## Patient independence and transfer
+
+Randomly splitting EEG windows can allow a model to recognize a person, session, or recording artifact instead of learning features that transfer. In a Siena split experiment, segment-random and patient-held-out accuracy differed materially: 79.1% versus 65.1% [V] ([Brookshire et al.](https://doi.org/10.3389/fnins.2024.1373515)). Reports should state whether separation is by window, file, session, person, hospital, and time. Validation is not independent when a person appears in training.
+
+Peh et al. provide patient-independent, cross-dataset event-level evidence. A CNN-transformer with belief matching was trained on TUH-SZ and assessed across five independent EEG datasets at six centers ([Peh et al.](https://doi.org/10.1142/S0129065723500120)). Scalp, intracranial, and neonatal cohorts should remain separate rather than be pooled. Quote cohort-specific values only with their original metric definitions. Domain-adaptation studies also need to state target-data exposure: adapting on target recordings is different from testing a frozen model on untouched external data. Benchmark transfer supports claims about that specified protocol, not guaranteed clinical generalization.
+
+## Graph methods
+
+Graph methods encode relationships among channels or learned correlations. Tang et al.’s self-supervised graph method uses distance and sample-specific correlation information ([ICLR/OpenReview](https://openreview.net/forum?id=k9bx1EfHI_-)); DGDCN modulates fixed Chebyshev supports with sample-specific attention (see [Chapter 6](06-seed-paper-appraisal.md)). An attention or correlation edge is a model dependency, not evidence of anatomical connectivity, causal propagation, or seizure-generating physiology. A fair comparison should isolate graph construction, attention, temporal receptive field, and preprocessing instead of attributing a full model’s result to “dynamic connectivity.”
+
+## Self-supervision, weak supervision, and EEG foundation models
+
+General EEG pretraining and seizure-specific pretraining answer different questions. BENDR is a representation-learning method, not clinical validation for seizure-event detection ([Kostas et al.](https://doi.org/10.3389/fnhum.2021.653659)).
+
+LaBraM’s paper is titled “Large Brain Model for Learning Generic Representations with Tremendous EEG Data in BCI.” It reports 5.8M, 46M, and 369M parameter variants [V]. Its reported downstream tasks are TUAB normal/abnormal 10-second clips and TUEV six-class, 5-second EEG event-type clips. TUEV includes epileptiform classes, but these are not continuous seizure-detection endpoints ([official ICLR paper](https://proceedings.iclr.cc/paper_files/paper/2024/file/47393e8594c82ce8fd83adc672cf9872-Paper-Conference.pdf)).
+
+CBraMod reports a 4.0M-parameter model [V] and a CHB-MIT binary seizure/non-seizure 10-second clip task with 326,993 samples and common 16 bipolar channels. Table 8 reports five-seed mean ± standard deviation (SD): balanced accuracy 0.7398 ± 0.0284, area under the precision-recall curve (AUPRC) 0.3689 ± 0.0382, and area under the receiver operating characteristic curve (AUROC) 0.8892 ± 0.0154 [V] ([paper, Appendix E.2](https://arxiv.org/html/2412.07236)). Cases 1-19 train, cases 20-21 validate, and cases 22-23 test. PhysioNet identifies chb21 as the same female subject as chb01 recorded later, so training and validation share a person. This establishes validation-identity overlap, not test-person leakage ([CHB-MIT record](https://physionet.org/content/chbmit/1.0.0/)). The inspected seizure appendix did not establish whether pretraining included these target identities. The clip task reports no event alarms per day or continuous-stream result.
+
+REVE reports 12M, 69M, and 408M parameter variants [V] and broad pretraining; its abstract mentions seizure detection. Its enumerated task suite identifies TUAB abnormality and TUEV event-type tasks, but no identifiable seizure dataset or protocol. A seizure-detection result or leaderboard position should not be assigned without that protocol ([official NeurIPS paper](https://proceedings.neurips.cc/paper_files/paper/2025/file/20a917f77773ac0fa8bea2bdd6606b66-Paper-Conference.pdf)).
+
+PPi is seizure-specific pretraining for intracranial stereoelectroencephalography (SEEG), not generic scalp seizure classification. On MAYO (18 patients) and FNUSA (13), the study rotates nonoverlapping patient groups, using four groups for source training, one for validation, and one as a held-out target. Its private single-hospital cohort has seven people, with a described 5/1/1 train/validation/test split and additional repetitions across patients. It reports precision, recall, F1, and F2; event false alarms per hour were not found in the inspected evaluation. This is retrospective, patient-separated intracranial EEG evidence. It does not establish continuous clinical alarms or transfer to scalp EEG ([Yuan et al., NeurIPS 2023](https://proceedings.neurips.cc/paper_files/paper/2023/file/dbeb7e621d4a554069a6a775da0f7273-Paper-Conference.pdf)).
+
+Weak supervision is a separate data strategy. Saab et al. trained from routine noisy labels on a large clinical archive and evaluated against clinician-labeled data, showing a route to reduce exhaustive hand-labeling ([Saab et al.](https://doi.org/10.1038/s41746-020-0264-0)). The paper’s estimated labeling hours and cost are counterfactual assumptions, not measured labor savings.
+
+## Synthesis
+
+The model-family timeline is not a validated progression from rules to CNNs, graph neural networks (GNNs), transformers, and foundation models. New representations can improve a specified clip or event task, but every performance claim must name the modality, cohort, split, annotation, and endpoint. Pretraining may improve label efficiency, but does not remove the need to audit patient overlap, negative exposure, site/device shift, calibration, artifact coverage, and alarm burden.
+
+**Confidence:** High that the named foundation papers report different actual endpoints, based on inspection of official papers and task appendices. Moderate that these examples represent the field-wide trajectory because this is a targeted evidence inventory, not a systematic review.
